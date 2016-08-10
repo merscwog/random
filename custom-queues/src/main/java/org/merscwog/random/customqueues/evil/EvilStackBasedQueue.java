@@ -33,11 +33,6 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
      */
     private Deque<T> realStack = new ArrayDeque<T>();
 
-    /**
-     * This poor stack only gets instantiated to satisfy the requirements to use two stacks.
-     */
-    private Deque<T> unused = new ArrayDeque<T>(0);
-
     @Override
     public void insert(T element) {
         realStack.push(element);
@@ -49,7 +44,7 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
             throw new NoSuchElementException("No element to retrieve");
         }
 
-        return internalEvilRecursiveRetrieve(realStack);
+        return internalEvilIterativeRetrieve(realStack);
     }
 
     /**
@@ -63,7 +58,7 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
 
         if (stack.size() == 1) {
             result = stack.pop();
-        }
+        } 
         else {
             T methodSavedStackVar = stack.pop();
             result = internalEvilRecursiveRetrieve(stack);
@@ -71,6 +66,34 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
         }
 
         System.out.println("bob");
+
+        return result;
+    }
+
+    private T internalEvilIterativeRetrieve(Deque<T> origStack) {
+        Deque<Deque<T>> stackOfStacks = new ArrayDeque<Deque<T>>();
+        stackOfStacks.push(new ArrayDeque<T>(origStack));
+
+        while (!origStack.isEmpty()) { 
+            origStack.pop(); 
+        }
+
+        T result = null;
+        boolean bottomReached = false;
+        while (!stackOfStacks.isEmpty()) {
+            Deque<T> stack = stackOfStacks.pop();
+            if (stack.size() == 1) {
+                bottomReached = true;
+                result = stack.pop();
+            } else if (bottomReached) {
+                origStack.push(stack.pop());
+            } else {
+                stackOfStacks.push(stack);
+                Deque<T> popStack = new ArrayDeque<T>(stack);
+                popStack.pop();
+                stackOfStacks.push(popStack);
+            }
+        }
 
         return result;
     }
