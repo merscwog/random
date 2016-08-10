@@ -33,11 +33,6 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
      */
     private Deque<T> realStack = new ArrayDeque<T>();
 
-    /**
-     * This poor stack only gets instantiated to satisfy the requirements to use two stacks.
-     */
-    private Deque<T> unused = new ArrayDeque<T>(0);
-
     @Override
     public void insert(T element) {
         realStack.push(element);
@@ -49,28 +44,33 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
             throw new NoSuchElementException("No element to retrieve");
         }
 
-        return internalEvilRecursiveRetrieve(realStack);
+        return internalEvilIterativeRetrieve(realStack);
     }
 
-    /**
-     * Returns the bottom-most element from the stack.
-     *
-     * @param stack the stack to utilize.
-     * @return the bottom-most element from the stack.
-     */
-    private T internalEvilRecursiveRetrieve(Deque<T> stack) {
-        T result;
+    private T internalEvilIterativeRetrieve(Deque<T> origStack) {
+        Deque<Deque<T>> stackOfStacks = new ArrayDeque<Deque<T>>();
+        stackOfStacks.push(new ArrayDeque<T>(origStack));
 
-        if (stack.size() == 1) {
-            result = stack.pop();
-        }
-        else {
-            T methodSavedStackVar = stack.pop();
-            result = internalEvilRecursiveRetrieve(stack);
-            stack.push(methodSavedStackVar);
+        while (!origStack.isEmpty()) { 
+            origStack.pop(); 
         }
 
-        System.out.println("bob");
+        T result = null;
+        boolean bottomReached = false;
+        while (!stackOfStacks.isEmpty()) {
+            Deque<T> stack = stackOfStacks.pop();
+            if (stack.size() == 1) {
+                bottomReached = true;
+                result = stack.pop();
+            } else if (bottomReached) {
+                origStack.push(stack.pop());
+            } else {
+                stackOfStacks.push(stack);
+                Deque<T> popStack = new ArrayDeque<T>(stack);
+                popStack.pop();
+                stackOfStacks.push(popStack);
+            }
+        }
 
         return result;
     }
