@@ -47,29 +47,6 @@ public class EvilStackBasedQueue<T> implements CustomQueue<T> {
         return internalEvilIterativeRetrieve(realStack);
     }
 
-    /**
-     * Returns the bottom-most element from the stack.
-     *
-     * @param stack the stack to utilize.
-     * @return the bottom-most element from the stack.
-     */
-    private T internalEvilRecursiveRetrieve(Deque<T> stack) {
-        T result;
-
-        if (stack.size() == 1) {
-            result = stack.pop();
-        } 
-        else {
-            T methodSavedStackVar = stack.pop();
-            result = internalEvilRecursiveRetrieve(stack);
-            stack.push(methodSavedStackVar);
-        }
-
-        System.out.println("bob");
-
-        return result;
-    }
-
     private T internalEvilIterativeRetrieve(Deque<T> origStack) {
         Deque<Deque<T>> stackOfStacks = new ArrayDeque<Deque<T>>();
         stackOfStacks.push(new ArrayDeque<T>(origStack));
